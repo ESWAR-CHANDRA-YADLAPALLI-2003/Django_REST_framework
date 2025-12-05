@@ -1,4 +1,4 @@
-from django.shortcuts import render
+''' from django.shortcuts import render
 
 # Create your views here.
 # api_app/views.py
@@ -63,3 +63,67 @@ class StudentDetailAPIView(APIView):
         student = self.get_object(pk)
         student.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+'''
+# Authentication not Required
+'''
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated, AllowAny  # <- BOTH imported
+from .models import Student
+from .serializers import StudentSerializer
+
+class StudentViewSet(viewsets.ModelViewSet):
+    """
+    ModelViewSet gives list/retrieve/create/update/destroy by default.
+    """
+    queryset = Student.objects.all().order_by("-created_at")
+    serializer_class = StudentSerializer
+    permission_classes = [IsAuthenticated]  # default permission
+
+    # Example: public read, only authenticated create/update/delete
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]
+        return [IsAuthenticated()] '''
+
+# Authentication Required
+'''
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from .models import Student
+from .serializers import StudentSerializer
+
+class StudentViewSet(viewsets.ModelViewSet):
+    """
+    CRUD operations for Student model
+    All endpoints require authentication (JWT or Browsable API login)
+    """
+    queryset = Student.objects.all().order_by("-created_at")
+    serializer_class = StudentSerializer
+    permission_classes = [IsAuthenticated]  # enforce authentication
+
+'''
+
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from .models import Student
+from .serializers import StudentSerializer
+
+class StudentViewSet(viewsets.ModelViewSet):
+    """
+    Student CRUD API
+
+    - list/retrieve: optionally public (AllowAny) or authenticated
+    - create/update/delete: authenticated only
+    - Works with JWT (for API clients) and SessionAuthentication (for browser)
+    """
+    queryset = Student.objects.all().order_by("-created_at")
+    serializer_class = StudentSerializer
+
+    # Option A: Require authentication for ALL actions (simplest)
+    # permission_classes = [IsAuthenticated]
+
+    # Option B: Public read, login required for write
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]      # anyone can view
+        return [IsAuthenticated()]   # create/update/delete requires login

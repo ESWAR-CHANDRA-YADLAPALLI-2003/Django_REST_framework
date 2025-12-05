@@ -1,6 +1,6 @@
 # api_app/models.py
 from django.db import models
-
+from django.contrib.auth import get_user_model
 class Student(models.Model):
     name = models.CharField(max_length=120)
     email = models.EmailField(unique=True)
